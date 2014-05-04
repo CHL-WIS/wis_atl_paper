@@ -1,0 +1,207 @@
+\documentclass[12pt,letterpaper]{article}
+\usepackage[latin1]{inputenc}
+\usepackage{float}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage{graphicx}
+\usepackage{hhline}
+
+\parindent=0in
+\parskip=8pt % this is variable, choose the number you want
+
+\begin{document}
+\section{Introduction}
+
+The Wave Information Study (WIS) provided a 20 year wave hindcast for the Atlantic Ocean basin in 2003.  This version of the WIS Atlantic Hindcast utilized WisWave model which is a 2G wave model providing a parameterized solution for the nonlinear interactions common to wind-sea development.  In the present, we will present a 33-year wave hindcast for the Atlantic basin.  WaveWatch III (WW3), a 3G wave model, was used to provide an explicit representation of the processes relevant for wave evolution (Komen et al. 1985).  The newest source terms developed by Arduine (reference) were used in WW3.  This includes the swell dissipation source term.
+
+The model simulation was setup with a 3 level nested grid system ranging from a 0.5-deg basin scale to a 0.08333-deg regional scale grid.  WW3 was run using the ww3\_multi functionality, so two-way nesting was incorporated as well as simultaneous parallel running.  Each simulation required 32 processors at time of 3 hours per month.
+
+Validation for each month was performed using buoy measurements from National Data Buoy Center (NDBC) , US Army Corps of Engineers Field Research Facility (USACE FRF), Coastal Data Information Program (CDIP) , and Environment Canada.  Time series analysis produced statistics of bias, rmse, and Scatter Index.  Quantile-Quantile analysis was calculated to provide an overall goodness of fit for each station.
+
+
+\section{Grid Setup}  
+A WIS Atlantic hindcast used a three level nested grid system with two-way coupling between the higher and lower resolution grids.  The General Bathymetric Chart of the World (GEBCO) 30-arc second bathymetric data set was used in the development of all grids.  In all, 3 files were created for each level, the grid file (*.grd), mask file (*.mask), and the obstruction file (*.obst).  The grid file contains all the bathymetry values at each grid point.  The mask file allows us to specify nesting locations and identifies the land-sea points.  The obstruction file identifies the amount of transmission of wave energy pasts unresolved obstructions such as islands.
+
+In all, six grids were used in the Atlantic hindcast production simulations.  All the grids with the latitude, longitude, and resolutions are in Table \ref{grids}.  The level is specified in the Grid ID catagory where level 1 is the lowest resolution and the level 3 grids are the highest resolution.  The higher the level number, means the grid is nested in the grid with one lower level number.
+
+\begin{table}[h]
+\begin{center}
+\caption{WIS Atlantic Hindcast Grids}
+\begin{tabular}{||c|c|c|c|c||} % 3 cols
+  \hline\hline
+  \textbf{Grid Name}  & \textbf{Grid ID} & \textbf{Longitude (deg)} & \textbf{Latitude (deg)} & \textbf{Resolution (deg)} \\
+  \hline\hline
+  Basin & level1 & $-84.0^{\circ}$W : $20.0^{\circ}$E & $0.0^{\circ}$N : $72.0^{\circ}$N & $0.05$ x $0.05$ \\
+  \hline
+  East Coast & level2 & $-83.0^{\circ}$W : $-55.0^{\circ}$W & $22.0^{\circ}$N : $48.0^{\circ}$N & $0.25$ x $0.25$ \\
+  \hline 
+  US NorthEast & level3N & $-79.5^{\circ}$W : $-66.0^{\circ}$W & $40.0^{\circ}$N : $45.5^{\circ}$N & $0.083$ x $0.083$ \\
+  \hline 
+  US Central & level3C & $-82.0^{\circ}$W : $-73.5^{\circ}$W & $32.0^{\circ}$N : $41.0^{\circ}$N & $0.083$ x $0.083$ \\
+  \hline
+  US SouthEast & level3S1 & $-82.0^{\circ}$W : $-73.5^{\circ}$W & $28.0^{\circ}$N : $32.5^{\circ}$N & $0.083$ x $0.083$ \\
+  \hline 
+  US S. Florida &  level3S2 & $-82.0^{\circ}$W : $-73.5^{\circ}$W & $24.0^{\circ}$N : $28.5^{\circ}$N & $0.083$ x $0.083$ \\
+  \hline\hline
+\end{tabular}
+\end{center}
+\label{grids}
+\end{table}
+
+%\begin{equation}
+\begin{align}
+t_{CFL} & = \frac{\Delta x}{C_{g}} \\
+ & = \frac{40 * 10^{6} * \Delta x * \cos (maxlat) * 4\pi * f}{360 * 1.15 * g} \\
+ & = 123766 * \Delta x * \cos (maxlat) * f .
+\end{align}
+
+\subsection{Time Step}
+
+\begin{table}
+\begin{center}
+
+\begin{tabular}{||c|c|c|c|c||}
+\hline\hline
+Grid ID & Global & CFL & Intra-Spectral & Source Term \\
+\hline\hline
+level1 & $1200$ & $600$ & $600$ & $15$ \\
+\hline
+level2 & $1200$ & $600$ & $600$ & $15$ \\
+\hline
+level3N & $300$ & $150$ & $150$ & $15$ \\
+\hline
+level3C & $300$ & $160$ & $150$ & $15$ \\
+\hline
+level3S1 & $300$ & $175$ & $150$ & $15$ \\
+\hline
+level3S2 & $300$ & $190$ & $150$ & $15$ \\
+\hline\hline
+\end{tabular}
+\end{center}
+\end{table}
+
+%%------------------------------------------------
+%% Atlantic Level 1 description
+%%------------------------------------------------
+\subsection{Atlantic Level 1}
+\subsubsection{Bathymetry}
+\subsubsection{Time Step}
+The grid resolution for Level 1 is 0.5-deg with a maximum latitude of 72.0-deg.  This calcuates to a CFL time step of 1338.6-sec.  We will round this value down to 1200-sec for the CFL time step.  We can set the global time step to 2*CFL which is 2400-sec.  The direction time step is 1200-sec, and the source time step is 15-sec.  
+
+%%-------------------------------------------------
+%% Atlantic Level 2 Description
+%%-------------------------------------------------
+\subsection{Atlantic Level 2}
+\subsubsection{Bathymetry}
+\bigskip
+\begin{figure}[H]
+\centering
+\includegraphics[scale=1]{/home/thesser1/ATL/Bathy/Level2/ATL_L2_15m.png}
+\caption{Level 2 15-m}
+\label{level2_15m}
+\end{figure}
+
+\subsubsection{Time Step}
+The grid resolution for Level 2 is 15-m or 0.25-deg with a maximum latitude of 48.0-deg.  This cacluates to a CFL time step of 724.6-sec.  We will round this value down to 700-sec for the CFL time step.  This would set the global time step to 1400-sec.  However, we want this time step to be a multiple of the global time step for Level 1, so we will set it to 1200-sec.  This is the time step when information is exchanged, so overall it saves time to have them occer at the same time step.  The direction time step is 600-sec, and the source time step is 15-sec.  
+
+\newpage
+
+%%------------------------------------------------
+%% Atlantic Level 3N Description
+%%------------------------------------------------
+\subsection{Level 3N}
+\subsubsection{Bathymetry}
+After reviewing the two test sections, we determined the 5-min grid for the Level 3 North East grid was not adequate.  We developed a 3-min and 6-min grid based off the GEBCO 30-sec bathymetry database. 
+
+\begin{figure}[H]
+\centering
+\includegraphics[scale=1]{/home/thesser1/ATL/Bathy/Level3N/ATL_L3N_6m.png} 
+\caption{New grid 6-m}
+\label{new_grid_6m}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[scale=1]{/home/thesser1/ATL/Bathy/Level3N/ATL_L3N_3m.png} 
+\caption{New grid 3-m}
+\label{new_grid_3m}
+\end{figure}
+
+
+\subsubsection{Time Step}
+The grid resolution for Level3N is tested at both 3-m and 6-m grids.  The time step must be calculated for both the grids to ensure stability of the model.
+
+The 3-m or 0.05-deg grid has a maximume latitude of 45-deg.  The CFL time step for this grid is calculated as 153.1.  The value of the CFL time step is rounded to 150-sec.  The value of the global time step is set to 300-sec and the direction time step is 150-sec.  The source time step will be 15-sec. 
+
+\newpage
+
+%%--------------------------------------------------
+%% Atlantic Level 3C Description
+%%--------------------------------------------------
+\subsection{Level 3C}
+\subsubsection{Bathymetry}
+\begin{figure}[H]
+\centering
+\includegraphics[scale=1]{/home/thesser1/ATL/Bathy/Level3C/ATL_L3C_6m.png}
+\caption{New grid 6-m}
+\label{L3C_6m}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[scale=1]{/home/thesser1/ATL/Bathy/Level3C/ATL_L3C_3m.png} 
+\caption{New grid 3-m}
+\label{L3C_3m}
+\end{figure}
+
+
+\subsubsection{Time Step}
+The Level3C 3-m or 0.05-deg grid has a maximum latitude of 41-deg.  The CFL time step is calculated as 163.4-sec, so it is rounded down to 160-sec.  The value of the global time step is set to 300-sec and the direction time step is set to 150-sec.  The source time step is 15-sec.  
+\newpage
+
+%%-------------------------------------------------
+%% Atlantic Level 3S1 Description
+%%-------------------------------------------------
+\subsection{Level 3S1}
+\subsubsection{Bathymetry}
+\begin{figure}[H]
+\centering
+\includegraphics[scale=1]{/home/thesser1/ATL/Bathy/Level3S1/ATL_L3S1_6m.png}
+\caption{New grid 6-m}
+\label{L3S1_6m}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[scale=1]{/home/thesser1/ATL/Bathy/Level3S1/ATL_L3S1_3m.png}
+\caption{New grid 3-m}
+\label{L3S1_3m}
+\end{figure}
+
+\subsubsection{Time Step}
+The maximum latitude of Level3S1 is 32.5-deg for resolutions of 3-m or 0.05-deg.  The CFL time step for the 3-m grid is calculated as 182.7-sec, so we can set to 175-sec.  The global time step will be set to 300-sec for consitancy with other Level3 grids, and the direciton time step is set to 150-sec.  The source time step is 15-sec.  
+\newpage
+
+%%--------------------------------------------------
+%% Atlantic Level 3S2 Description
+%%--------------------------------------------------
+\subsection{Level 3S2}
+\subsubsection{Bathymetry}
+\begin{figure}[H]
+\centering
+\includegraphics[scale=1]{/home/thesser1/ATL/Bathy/Level3S2/ATL_L3S2_6m.png}
+\caption{New grid 6-m}
+\label{L3S2_6m}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[scale=1]{/home/thesser1/ATL/Bathy/Level3S2/ATL_L3S2_3m.png}
+\caption{New grid 3-m}
+\label{L3S2_3m}
+\end{figure}
+
+\subsubsection{Time Step}
+The maximum latitude of Level3S2 is 28.5-deg for the 3-m or 0.05-deg grid.  The CFL time step for the 3-m grid is calculated as 190.3-sec, so we can use a value of 190-sec.  The global time step will be set to 300-sec for consistancy and the direction time step is 150-sec.  The source time step is 15-sec.  
+\end{document}
